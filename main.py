@@ -1,5 +1,6 @@
 import random
 import time
+import netgraph
 
 
 def create_graph(n, threshold = 50):
@@ -168,10 +169,15 @@ def first_improvement_2_swap(graph, removed):
 
 
 if __name__ == '__main__':
-    graph = create_graph(40, threshold=80)
-    k = 20
+    graph = create_graph(20, threshold=80)
+    netwotk = netgraph.NetGraph(graph)
+
+    netwotk.show()
+    k = 7
     print_graph(graph)
     removed_1 = algo_greedy(graph, k, max_degree_best)
+
+
     print_graph(graph, removed_1, "graph_1.txt")
     removed_2 = algo_greedy(graph, k, min_conn_best)
     best_1 = calc_objective(graph, removed_1)
@@ -184,6 +190,7 @@ if __name__ == '__main__':
     print("min_conn")
     print(best_2)
     print(removed_2)
+    netwotk.show(removed_2)
 
     best_11 = best_1
     removed_11 = removed_1[:]
@@ -197,7 +204,7 @@ if __name__ == '__main__':
             best_1 = sol_1
         else:
             break
-    
+
     i2 = 0
     while True:
         i2 += 1
