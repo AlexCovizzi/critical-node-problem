@@ -1,6 +1,7 @@
 import random
 import time
 import netgraph
+import subprocess
 
 
 def create_graph(n, threshold = 50):
@@ -18,8 +19,8 @@ def create_graph(n, threshold = 50):
             return graph
 
 
-def print_graph(graph, removed=[], f="graph.txt"):
-    with open(f, "w") as f:
+def print_graph(graph, removed=[], out="graph.txt"):
+    with open(out, "w") as f:
         for i in range(len(graph)):
             if i in removed:
                 continue
@@ -34,6 +35,21 @@ def print_graph(graph, removed=[], f="graph.txt"):
                 if graph[i][j] == 1:
                     f.write(str(i) + " " + str(j) + "\n")
 
+def print_asp(graph, rem, out="problema.pl"):
+    with open(out, "w") as f:
+        for i in range(len(graph)):
+            f.write("nodo(" + str(i) + ")." + "\n")
+        
+        for i in range(len(graph)):
+            for j in range(i + 1, len(graph)):
+                if graph[i][j] == 1:
+                    f.write("arco(" + str(i) + ", " + str(j) + ")." + "\n")
+        
+        f.write("rem(" + str(k) + ").")
+
+        with open("critical-node.pl", "r") as model:
+            text = model.read()
+            f.write(text)
 
 def algo_greedy(graph, k, best):
     removed = []
@@ -218,10 +234,43 @@ def first_improvement_2_swap(graph, removed):
                         return True
 
 
+def global_optimum(graph, k, asp_name="problema.pl"):
+    print_asp(graph, k, asp_name)
+
+    asp_output = subprocess.run(['clingo', asp_name], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    with open("asp-output", "w") as f:
+        f.write(asp_output)
+    
+    with open("asp-output", "r") as f:
+        result = f.readlines()[-10]
+    
+    atoms = result.split()
+    asp_removed = []
+    asp_sol = None
+    for atom in atoms:
+        if atom.startswith("removed"):
+            atom = atom[:-1]
+            node = int(atom[8:])
+            asp_removed.append(node)
+        if atom.startswith("conta"):
+            atom = atom[:-1]
+            asp_sol = int(atom[6:])
+    
+    return asp_sol, asp_removed
+
+# TODO: riordina i removed
 if __name__ == '__main__':
-    graph = create_graph(40, threshold=85)
+    graph = create_graph(30, threshold=85)
 
     k = 7
+
+    opt, opt_removed = global_optimum(graph, k)
+    
+    print("Global optimum")
+    print(opt)
+    print(opt_removed)
+
+    print("------------------------------")
     
     removed = algo_greedy(graph, k, max_degree_best)
 
@@ -231,8 +280,7 @@ if __name__ == '__main__':
     print(best)
     print(removed)
 
-    removed_tabu_100 = removed[:]
-    removed_tabu_1000 = removed[:]
+    removed_tabu = removed[:]
     
     while True:
         best_1_swap(graph, removed)
@@ -243,11 +291,8 @@ if __name__ == '__main__':
             break
 
     
-    tabu_search(graph, removed_tabu_100, n_stall=100)
-    best_tabu_100 = calc_objective(graph, removed_tabu_100)
-
-    tabu_search(graph, removed_tabu_1000, n_stall=1000)
-    best_tabu_1000 = calc_objective(graph, removed_tabu_1000)
+    tabu_search(graph, removed_tabu, n_stall=100)
+    best_tabu = calc_objective(graph, removed_tabu)
     
     print("------------------------------")
 
@@ -256,10 +301,5 @@ if __name__ == '__main__':
     print(removed)
 
     print("max_degree - tabu - 100")
-    print(best_tabu_100)
-    print(removed_tabu_100)
-
-    print("max_degree - tabu - 1000")
-    print(best_tabu_1000)
-    print(removed_tabu_1000)
-    
+    print(best_tabu)
+    print(removed_tabu)
