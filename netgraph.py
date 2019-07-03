@@ -1,16 +1,15 @@
 from tkinter import *
 import time
 import math
+import random
 
 class NetGraph:
 
-    def __init__(self, graph=[], w=600, h=600):
+    def __init__(self, graph=[], w=800, h=800):
         self.graph = graph
         self.width = w
         self.height = h
-        self.node_radius = 12
-        self.node_color = "white"
-        self.colors = ["#F5F691", "#97D5E0", "#D1AF94", "#EFCEC5", "#88B14B", "#EF562D", "#99B59F", "#C5E5DA", "#22B2D4"]
+        self.node_radius = 14
 
         self.master = Tk()
         self.canvas = Canvas(self.master, width=w, height=h)
@@ -51,7 +50,7 @@ class NetGraph:
             ty = self.height//2 + (self.width//2 - self.node_radius - 32) * math.sin(rads)
 
             r = self.node_radius
-            self.canvas.create_oval(tx-r, ty-r, tx+r, ty+r, fill=self.node_color, tags="node{}".format(i))
+            self.canvas.create_oval(tx-r, ty-r, tx+r, ty+r, fill="white", tags="node{}".format(i))
             self.canvas.create_text(tx, ty, text=str(i), font=("Helvetica", 12, "bold"), tags="text{}".format(i))
             
         for i in range(n_nodes):
@@ -71,13 +70,17 @@ class NetGraph:
             self.canvas.tag_raise("text{}".format(i))
 
     
-    def _visit_connected(self, i, visited, color_idx):
+    def _visit_connected(self, i, visited, n, color=None):
         visited[i] = 1
-        self.canvas.itemconfig("node{}".format(i), fill=self.colors[color_idx])
+        if color is None:
+            random.seed(2*n)
+            [r, g, b] = [random.randint(127, 255), random.randint(127, 255), random.randint(127, 255)]
+            color = '#%02x%02x%02x' % (r, g, b)
+        self.canvas.itemconfig("node{}".format(i), fill=color)
         row = self.graph[i]
         for j in range(len(row)):
             if row[j] == 1 and visited[j] == 0:
-                self._visit_connected(j, visited, color_idx)
+                self._visit_connected(j, visited, n, color)
 
 
     def _color_connected(self, removed):

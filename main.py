@@ -131,7 +131,57 @@ def k_swap(graph, removed, k=1):
         removed.append(swapped_left)
         left.append(swapped_removed)
 
-# TODO: implementare tabu search con best 1 swap
+
+def tabu_search(graph, removed, n_tabu=None, n_stall=100):
+    if n_tabu is None:
+        n_tabu = len(removed) // 2
+    left = [node for node in range(len(graph)) if node not in removed]
+    best_solution = calc_objective(graph, removed)
+    best_removed = removed[:]
+    current_solution = best_solution
+    current_removed = removed[:]
+    
+    tabu_list = []
+
+    i = 0
+
+    # tabu loop
+    while True:
+        best_swap = None
+        sol = -1
+        for r in current_removed:
+            for l in left:
+                removed_copy = current_removed[:]
+                removed_copy[removed_copy.index(r)] = l
+                sol_swapped = calc_objective(graph, removed_copy)
+                if (sol_swapped > sol and l not in tabu_list) or (sol_swapped > best_solution and l in tabu_list):
+                    best_swap = (r, l)
+                    sol = sol_swapped
+
+        if best_swap[0] not in tabu_list:
+            tabu_list.append(best_swap[0])
+        
+        if len(tabu_list) == n_tabu:
+            del tabu_list[0]
+        
+        current_solution = sol
+        current_removed[current_removed.index(best_swap[0])] = best_swap[1]
+        left[left.index(best_swap[1])] = best_swap[0]
+
+        i += 1
+
+        if current_solution > best_solution:
+            i = 0
+            best_solution = current_solution
+            best_removed = current_removed[:]
+        
+        if i == n_stall:
+            break
+    
+    removed.clear()
+    removed.extend(best_removed)
+
+
 def best_1_swap(graph, removed):
     left = [node for node in range(len(graph)) if node not in removed]
     sol = calc_objective(graph, removed)
@@ -169,73 +219,47 @@ def first_improvement_2_swap(graph, removed):
 
 
 if __name__ == '__main__':
-    graph = create_graph(20, threshold=80)
-    netwotk = netgraph.NetGraph(graph)
+    graph = create_graph(40, threshold=85)
 
-    netwotk.show()
     k = 7
-    print_graph(graph)
-    removed_1 = algo_greedy(graph, k, max_degree_best)
+    
+    removed = algo_greedy(graph, k, max_degree_best)
 
-
-    print_graph(graph, removed_1, "graph_1.txt")
-    removed_2 = algo_greedy(graph, k, min_conn_best)
-    best_1 = calc_objective(graph, removed_1)
-    best_2 = calc_objective(graph, removed_2)
+    best = calc_objective(graph, removed)
 
     print("max_degree")
-    print(best_1)
-    print(removed_1)
+    print(best)
+    print(removed)
 
-    print("min_conn")
-    print(best_2)
-    print(removed_2)
-    netwotk.show(removed_2)
-
-    best_11 = best_1
-    removed_11 = removed_1[:]
+    removed_tabu_100 = removed[:]
+    removed_tabu_1000 = removed[:]
     
-    i1 = 0
     while True:
-        i1 += 1
-        best_1_swap(graph, removed_1)
-        sol_1 = calc_objective(graph, removed_1)
-        if sol_1 > best_1:
-            best_1 = sol_1
+        best_1_swap(graph, removed)
+        sol = calc_objective(graph, removed)
+        if sol > best:
+            best = sol
         else:
             break
 
-    i2 = 0
-    while True:
-        i2 += 1
-        best_1_swap(graph, removed_11)
-        sol_11 = calc_objective(graph, removed_11)
-        if sol_11 >= best_11 and i2 < 1000:
-            best_11 = sol_11
-        else:
-            break
+    
+    tabu_search(graph, removed_tabu_100, n_stall=100)
+    best_tabu_100 = calc_objective(graph, removed_tabu_100)
 
-    while True:
-        best_1_swap(graph, removed_2)
-        sol_2 = calc_objective(graph, removed_2)
-        if sol_2 > best_2:
-            best_2 = sol_2
-        else:
-            break
+    tabu_search(graph, removed_tabu_1000, n_stall=1000)
+    best_tabu_1000 = calc_objective(graph, removed_tabu_1000)
     
     print("------------------------------")
 
     print("max_degree - 1-swap")
-    print("Numero iterazioni: " + str(i1))
-    print(best_1)
-    print(removed_1)
+    print(best)
+    print(removed)
 
-    print("max_degree - 2-swap")
-    print("Numero iterazioni: " + str(i2))
-    print(best_11)
-    print(removed_11)
+    print("max_degree - tabu - 100")
+    print(best_tabu_100)
+    print(removed_tabu_100)
 
-    print("min_conn - 1-swap")
-    print(best_2)
-    print(removed_2)
+    print("max_degree - tabu - 1000")
+    print(best_tabu_1000)
+    print(removed_tabu_1000)
     
