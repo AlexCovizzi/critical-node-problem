@@ -2,6 +2,7 @@ import random
 import time
 import netgraph
 import subprocess
+import sys
 
 
 def create_graph(n, threshold = 50):
@@ -19,22 +20,6 @@ def create_graph(n, threshold = 50):
             return graph
 
 
-def print_graph(graph, removed=[], out="graph.txt"):
-    with open(out, "w") as f:
-        for i in range(len(graph)):
-            if i in removed:
-                continue
-            f.write(str(i) + "\n")
-        
-        for i in range(len(graph)):
-            if i in removed:
-                continue
-            for j in range(i + 1, len(graph)):
-                if j in removed:
-                    continue
-                if graph[i][j] == 1:
-                    f.write(str(i) + " " + str(j) + "\n")
-
 def print_asp(graph, rem, out="problema.pl"):
     with open(out, "w") as f:
         for i in range(len(graph)):
@@ -51,38 +36,87 @@ def print_asp(graph, rem, out="problema.pl"):
             text = model.read()
             f.write(text)
 
-def algo_greedy(graph, k, best):
+
+def algo_greedy(graph, k, best, stoc_dim=1):
     removed = []
     for i in range(k):
-        best_vertex = best(graph, removed)
+        best_vertex = best(graph, removed, stoc_dim)
         removed.append(best_vertex)
     return removed
 
 
-def max_degree_best(graph, removed):
+def max_degree_best(graph, removed, k=1):
     deg_vertices = [sum([n for idx,n in enumerate(row) if idx not in removed]) for row in graph]
+    best_vertices = []
+
     for i in removed:
         deg_vertices[i] = -1
-    max_deg = max(deg_vertices)
-    max_vertex = deg_vertices.index(max_deg)
-    return max_vertex
+    
+    for i in range(k):
+        max_deg = max(deg_vertices)
+        max_vertex = deg_vertices.index(max_deg)
+        best_vertices.append(max_vertex)
+        deg_vertices.pop(max_vertex)
+    
+    random.shuffle(best_vertices)
+    return best_vertices[0]
 
 # buono con tanti nodi e grafo meno sparso
-def min_conn_best(graph, removed):
+def min_conn_best(graph, removed, k=1):
     cur_best_couple = ()
     cur_best_val = 10000000
     deg_vertices = [sum([n for idx,n in enumerate(row) if idx not in removed]) for row in graph]
-    for node in range(len(graph)):
-        if node in removed or deg_vertices[node] == 0:
-            continue
-        for node_2, conn in enumerate(graph[node]):
-            if conn == 1 and node_2 not in removed and node_2 > node:
-                couple_degree = deg_vertices[node] + deg_vertices[node_2]
-                if couple_degree < cur_best_val:
-                    cur_best_couple = (node, node_2)
-                    cur_best_val = couple_degree
+
+    best_couples = []
+
+    for i in range(k):
+        for node in range(len(graph)):
+            if node in removed or deg_vertices[node] == 0:
+                continue
+            for node_2, conn in enumerate(graph[node]):
+                if conn == 1 and node_2 not in removed and node_2 > node:
+                    couple_degree = deg_vertices[node] + deg_vertices[node_2]
+                    if couple_degree < cur_best_val and (node, node_2) not in best_couples:
+                        cur_best_couple = (node, node_2)
+                        cur_best_val = couple_degree
+        
+        best_couples.append(cur_best_couple)
     
     # restituisco il nodo con grado maggiore nella coppia
+    random.shuffle(best_couples)
+    cur_best_couple = best_couples[0]
+    if deg_vertices[cur_best_couple[0]] > deg_vertices[cur_best_couple[1]]:
+        return cur_best_couple[0]
+    else:
+        return cur_best_couple[1]
+
+
+def min_conn_ratio_best(graph, removed, k=1):
+    cur_best_couple = ()
+    cur_best_val = -1
+    deg_vertices = [sum([n for idx,n in enumerate(row) if idx not in removed]) for row in graph]
+
+    best_couples = []
+    
+    for i in range(k):
+        for node in range(len(graph)):
+            if node in removed or deg_vertices[node] == 0:
+                continue
+            for node_2, conn in enumerate(graph[node]):
+                if conn == 1 and node_2 not in removed and node_2 > node:
+                    if deg_vertices[node] > deg_vertices[node_2]:
+                        couple_degree = deg_vertices[node]/deg_vertices[node_2]
+                    else:
+                        couple_degree = deg_vertices[node_2]/deg_vertices[node]
+                    if couple_degree > cur_best_val and (node, node_2) not in best_couples:
+                        cur_best_couple = (node, node_2)
+                        cur_best_val = couple_degree
+            
+        best_couples.append(cur_best_couple)
+    
+    # restituisco il nodo con grado maggiore nella coppia
+    random.shuffle(best_couples)
+    cur_best_couple = best_couples[0]
     if deg_vertices[cur_best_couple[0]] > deg_vertices[cur_best_couple[1]]:
         return cur_best_couple[0]
     else:
@@ -122,16 +156,6 @@ def calc_objective(graph, removed):
     
     return sol
 
-def neighbour_search(graph, removed, mossa):
-    best = calc_objective(graph, removed)
-
-    while True:
-        mossa(graph, removed)
-        sol = calc_objective(graph, removed)
-        if sol > best:
-            best = sol
-        else:
-            shaking
 
 def k_swap(graph, removed, k=1):
     k = k if k < len(removed) else len(removed)
@@ -148,6 +172,7 @@ def k_swap(graph, removed, k=1):
         left.append(swapped_removed)
 
 
+# TODO: in una soluzione sono venuti dei valori ripetuti WTF!
 def tabu_search(graph, removed, n_tabu=None, n_stall=100):
     if n_tabu is None:
         n_tabu = len(removed) // 2
@@ -242,7 +267,10 @@ def global_optimum(graph, k, asp_name="problema.pl"):
         f.write(asp_output)
     
     with open("asp-output", "r") as f:
-        result = f.readlines()[-10]
+        if sys.platform.startswith('win'):
+            result = f.readlines()[-20]
+        else:
+            result = f.readlines()[-10]
     
     atoms = result.split()
     asp_removed = []
@@ -258,30 +286,153 @@ def global_optimum(graph, k, asp_name="problema.pl"):
     
     return asp_sol, asp_removed
 
-# TODO: riordina i removed
+
+def create_population(graph, removed_nodes, pop_dim, bests, stoc_dim):
+    population = []
+    for i in range(pop_dim):
+        random.shuffle(bests)
+        individual = algo_greedy(graph, removed_nodes, bests[0], stoc_dim)
+        population.append(individual)
+
+    return population
+
+
+# Come codifica, usiamo un vettore di k interi
+def genetic_algo_removed(graph, population, n_parents=2, max_generations=100):
+    k = len(population[0])
+    max_pop = len(population)
+    fitness_population = [calc_objective(graph, i) for i in population]
+
+    if n_parents % 2 == 1:
+        n_parents += 1
+
+    n_gen = 0 # numero generazione
+    while True:
+        ''' [2, 4, 1, 3] -> [4, 6, 7, 10] '''
+        selection_list = []
+        for fitness_removed in fitness_population:
+            if selection_list == []:
+                selection_list.append(fitness_removed)
+            else:
+                selection_list.append(fitness_removed + selection_list[-1])
+        
+        # Selezione dell'indice dei genitori
+        index_parents = []
+        while len(index_parents) != n_parents:
+            selected = random.randint(1, selection_list[-1])
+            for idx in range(len(selection_list)):
+                if selected <= selection_list[0]:
+                    if 0 not in index_parents:
+                        index_parents.append(0)
+                    break
+                if selected <= selection_list[idx] and selected > selection_list[idx-1]:
+                    if idx not in index_parents:
+                        index_parents.append(idx)
+                    break
+
+        # Crossover a maschera binaria
+        while index_parents:
+            ''' 010110 -> padre | 101001 -> madre | doppioni!! '''
+            mask = [random.randint(0, 1) for i in range(k)]
+            # Prendiamo i primi due genitori
+            parent_1 = population[index_parents.pop()]
+            parent_2 = population[index_parents.pop()]
+
+            left = [i for i in range(len(graph)) if i not in parent_1 and i not in parent_2]
+
+            child_1 = []
+            child_2 = []
+
+            for idx, bit in enumerate(mask):
+                if bit == 0:
+                    child_1.append(parent_1[idx])
+                    child_2.append(parent_2[idx])
+                elif bit == 1:
+                    child_1.append(parent_2[idx])
+                    child_2.append(parent_1[idx])
+
+            # scambio i doppioni nei figli
+            for idx, gene in enumerate(child_1):
+                if child_1.count(gene) > 1:
+                    new_gene = random.randint(0, len(left) - 1)
+                    while new_gene in child_1:
+                        new_gene = random.randint(0, len(left) - 1)
+                    child_1[idx] = left[new_gene]
+            for idx, gene in enumerate(child_2):
+                if child_2.count(gene) > 1:
+                    new_gene = random.randint(0, len(left) - 1)
+                    while new_gene in child_2:
+                        new_gene = random.randint(0, len(left) - 1)
+                    child_2[idx] = left[new_gene]
+
+            # Passo di mutazione
+            # Mutazione figlio 1
+            mut_gene = random.randint(0, len(child_1) - 1)
+            offset = random.randint(1, 1000)
+            new_value = (child_1[mut_gene] + offset) % len(graph)
+            while new_value in child_1:
+                offset = random.randint(1, 1000)
+                new_value = (child_1[mut_gene] + offset) % len(graph)
+            child_1[mut_gene] = new_value
+
+            # Mutazione figlio 2
+            mut_gene = random.randint(0, len(child_2) - 1)
+            offset = random.randint(1, 1000)
+            new_value = (child_2[mut_gene] + offset) % len(graph)
+            while new_value in child_1:
+                offset = random.randint(1, 1000)
+                new_value = (child_2[mut_gene] + offset) % len(graph)
+            child_2[mut_gene] = new_value
+
+            # I due figli sono aggiunti alla popolazione
+            population.append(child_1)
+            population.append(child_2)
+
+        # Sostituzione generazionale
+        fitness_population = [calc_objective(graph, i) for i in population]
+        while len(population) > max_pop:
+            min_fitness = min(fitness_population)
+            idx = fitness_population.index(min_fitness)
+            population.pop(idx)
+            fitness_population.pop(idx)
+        
+        n_gen += 1
+        # Condizione di stop
+        if n_gen == max_generations:
+            break
+    # Restituisco il migliore individuo
+    max_fitness = max(fitness_population)
+    idx = fitness_population.index(max_fitness)
+    return population[idx]
+
+
 if __name__ == '__main__':
-    graph = create_graph(30, threshold=85)
+    graph = create_graph(75, threshold=90)
 
-    k = 7
-
+    k = 20
+    """
     opt, opt_removed = global_optimum(graph, k)
     
     print("Global optimum")
     print(opt)
+    opt_removed.sort()
     print(opt_removed)
+    """
 
     print("------------------------------")
+
+    bests = [max_degree_best, min_conn_best, min_conn_ratio_best]
+
+    population = create_population(graph, k, 20, bests, 5)
+    removed_tabu = population[0][:]
+    removed = genetic_algo_removed(graph, population, n_parents=4, max_generations=50)
     
-    removed = algo_greedy(graph, k, max_degree_best)
-
-    best = calc_objective(graph, removed)
-
-    print("max_degree")
-    print(best)
+    print("Genetic optimum")
+    print(calc_objective(graph, removed))
+    removed.sort()
     print(removed)
 
-    removed_tabu = removed[:]
-    
+    """
     while True:
         best_1_swap(graph, removed)
         sol = calc_objective(graph, removed)
@@ -289,17 +440,15 @@ if __name__ == '__main__':
             best = sol
         else:
             break
-
+    """
     
-    tabu_search(graph, removed_tabu, n_stall=100)
+    tabu_search(graph, removed_tabu, n_tabu=k-3, n_stall=100)
     best_tabu = calc_objective(graph, removed_tabu)
     
     print("------------------------------")
 
-    print("max_degree - 1-swap")
-    print(best)
-    print(removed)
-
-    print("max_degree - tabu - 100")
+    print("tabu - 100")
     print(best_tabu)
+    removed_tabu.sort()
     print(removed_tabu)
+    
