@@ -5,7 +5,7 @@ import subprocess
 import sys
 
 
-def create_graph(n, threshold = 50):
+def create_graph(n, threshold = 50, connected=True):
     while True:
         graph = [[0 for i in range(n)] for j in range(n)]
         for i in range(n):
@@ -16,7 +16,7 @@ def create_graph(n, threshold = 50):
                 val = random.randint(0, 100)
                 graph[i][j] = 0 if val <= threshold else 1
                 graph[j][i] = graph[i][j]
-        if is_connected(graph):
+        if not connected or is_connected(graph):
             return graph
 
 
@@ -56,7 +56,7 @@ def max_degree_best(graph, removed, k=1):
         max_deg = max(deg_vertices)
         max_vertex = deg_vertices.index(max_deg)
         best_vertices.append(max_vertex)
-        deg_vertices.pop(max_vertex)
+        deg_vertices[max_vertex] = -1
     
     random.shuffle(best_vertices)
     return best_vertices[0]
@@ -172,10 +172,10 @@ def k_swap(graph, removed, k=1):
         left.append(swapped_removed)
 
 
-# TODO: in una soluzione sono venuti dei valori ripetuti WTF!
 def tabu_search(graph, removed, n_tabu=None, n_stall=100):
     if n_tabu is None:
         n_tabu = len(removed) // 2
+
     left = [node for node in range(len(graph)) if node not in removed]
     best_solution = calc_objective(graph, removed)
     best_removed = removed[:]
@@ -208,6 +208,7 @@ def tabu_search(graph, removed, n_tabu=None, n_stall=100):
         current_solution = sol
         current_removed[current_removed.index(best_swap[0])] = best_swap[1]
         left[left.index(best_swap[1])] = best_swap[0]
+        #print([el for el in current_removed if el in left])
 
         i += 1
 
@@ -297,8 +298,10 @@ def create_population(graph, removed_nodes, pop_dim, bests, stoc_dim):
     return population
 
 
-# Come codifica, usiamo un vettore di k interi
-def genetic_algo_removed(graph, population, n_parents=2, max_generations=100):
+# Come codifica, usiamo un vettore di k interi, con k numero di nodi rimossi
+def genetic_algo_removed(graph, pop, n_parents=2, max_generations=100):
+    # deep copy popolazione
+    population = [e[:] for e in pop]
     k = len(population[0])
     max_pop = len(population)
     fitness_population = [calc_objective(graph, i) for i in population]
@@ -307,7 +310,7 @@ def genetic_algo_removed(graph, population, n_parents=2, max_generations=100):
         n_parents += 1
 
     n_gen = 0 # numero generazione
-    while True:
+    while n_gen < max_generations:
         ''' [2, 4, 1, 3] -> [4, 6, 7, 10] '''
         selection_list = []
         for fitness_removed in fitness_population:
@@ -397,9 +400,100 @@ def genetic_algo_removed(graph, population, n_parents=2, max_generations=100):
             fitness_population.pop(idx)
         
         n_gen += 1
-        # Condizione di stop
-        if n_gen == max_generations:
-            break
+
+    # Restituisco il migliore individuo
+    max_fitness = max(fitness_population)
+    idx = fitness_population.index(max_fitness)
+    return population[idx]
+
+
+# Come codifica, usiamo un vettore binario lungo n numero di nodi
+def genetic_algo_binary(graph, pop, n_parents=2, max_generations=100):
+    def to_binary(graph, removed):
+        return [1 if i in removed else 0 for i in range(len(graph))]
+    
+    def to_removed(binary):
+        return [i for i in range(len(binary)) if binary[i] == 1]
+
+    # deep copy popolazione
+    population = [e[:] for e in pop]
+
+    k = len(population[0])
+    max_pop = len(population)
+    fitness_population = [calc_objective(graph, i) for i in population]
+
+    if n_parents % 2 == 1:
+        n_parents += 1
+
+    n_gen = 0 # numero generazione
+    while n_gen < max_generations:
+        ''' [2, 4, 1, 3] -> [4, 6, 7, 10] '''
+        selection_list = []
+        for fitness_removed in fitness_population:
+            if selection_list == []:
+                selection_list.append(fitness_removed)
+            else:
+                selection_list.append(fitness_removed + selection_list[-1])
+        
+        # Selezione dell'indice dei genitori
+        index_parents = []
+        while len(index_parents) != n_parents:
+            selected = random.randint(1, selection_list[-1])
+            for idx in range(len(selection_list)):
+                if selected <= selection_list[0]:
+                    if 0 not in index_parents:
+                        index_parents.append(0)
+                    break
+                if selected <= selection_list[idx] and selected > selection_list[idx-1]:
+                    if idx not in index_parents:
+                        index_parents.append(idx)
+                    break
+
+        # Crossover dove eredito i geni in comune
+        while index_parents:
+            # Prendiamo i primi due genitori
+            parent_1 = population[index_parents.pop()]
+            parent_2 = population[index_parents.pop()]
+            
+            # Trasformiamo in binary
+            parent_1 = to_binary(graph, parent_1)
+            parent_2 = to_binary(graph, parent_2)
+
+            child = [parent_1[i] if parent_1[i] == parent_2[i] else -1 for i in range(len(parent_1))]
+
+            not_assigned = [i for i in range(len(child)) if child[i] == -1]
+            genes_1 = random.sample(not_assigned, k - child.count(1))
+            for gene in not_assigned:
+                if gene in genes_1:
+                    child[gene] = 1
+                else:
+                    child[gene] = 0
+
+            # Passo di mutazione
+            # Mutazione figlio
+            mut_gene_1 = random.randint(0, len(child) - 1)
+            mut_gene_2 = random.randint(0, len(child) - 1)
+            while child[mut_gene_1] == child[mut_gene_2]:
+                mut_gene_2 = random.randint(0, len(child) - 1)
+            
+            tmp = child[mut_gene_1]
+            child[mut_gene_1] = child[mut_gene_2]
+            child[mut_gene_2] = tmp
+
+            # Il figlio è aggiunt alla popolazione
+            child = to_removed(child)
+            population.append(child)
+
+        # Sostituzione generazionale
+        fitness_population = [calc_objective(graph, i) for i in population]
+        while len(population) > max_pop:
+            min_fitness = min(fitness_population)
+            idx = fitness_population.index(min_fitness)
+            population.pop(idx)
+            fitness_population.pop(idx)
+        
+        n_gen += 1
+
     # Restituisco il migliore individuo
     max_fitness = max(fitness_population)
     idx = fitness_population.index(max_fitness)
@@ -407,32 +501,45 @@ def genetic_algo_removed(graph, population, n_parents=2, max_generations=100):
 
 
 if __name__ == '__main__':
-    graph = create_graph(75, threshold=90)
+    graph = create_graph(50, threshold=93, connected=False)
+    
+    print("Inizio: " + str(calc_objective(graph, [])))
 
-    k = 20
-    """
+    k = 6
+    
     opt, opt_removed = global_optimum(graph, k)
     
     print("Global optimum")
     print(opt)
     opt_removed.sort()
     print(opt_removed)
-    """
-
-    print("------------------------------")
+    
 
     bests = [max_degree_best, min_conn_best, min_conn_ratio_best]
 
     population = create_population(graph, k, 20, bests, 5)
-    removed_tabu = population[0][:]
-    removed = genetic_algo_removed(graph, population, n_parents=4, max_generations=50)
+
+    removed_tabu = algo_greedy(graph, k, min_conn_ratio_best)
+    removed = genetic_algo_removed(graph, population, n_parents=8, max_generations=100)
     
-    print("Genetic optimum")
+    print("Genetic removed optimum")
     print(calc_objective(graph, removed))
+    print("In pop: "+ str(removed in population))
     removed.sort()
     print(removed)
 
-    """
+    input()
+    
+    removed_binary = genetic_algo_binary(graph, population, n_parents=8, max_generations=100)
+
+    print("\nGenetic removed binary")
+    print(calc_objective(graph, removed_binary))
+    print("In pop: "+ str(removed_binary in population))
+    removed_binary.sort()
+    print(removed_binary)
+    print(str(removed) == str(removed_binary))
+
+    '''
     while True:
         best_1_swap(graph, removed)
         sol = calc_objective(graph, removed)
@@ -440,15 +547,18 @@ if __name__ == '__main__':
             best = sol
         else:
             break
-    """
+    '''
     
-    tabu_search(graph, removed_tabu, n_tabu=k-3, n_stall=100)
+    input()
+    
+    best_tabu_initial = calc_objective(graph, removed_tabu)
+    tabu_search(graph, removed_tabu, n_stall=100)
     best_tabu = calc_objective(graph, removed_tabu)
     
-    print("------------------------------")
+    print("\n------------------------------\n")
 
-    print("tabu - 100")
+    print(best_tabu_initial)
+    print("tabu")
     print(best_tabu)
     removed_tabu.sort()
     print(removed_tabu)
-    
