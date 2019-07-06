@@ -26,10 +26,10 @@ def print_solution(removed, sol, opt, calc_time):
 
 if __name__ == '__main__':
     # Creiamo un grafo di 30 nodi: toglieremo 7 nodi da esso
-    dim = 40
+    dim = 35
     graph = create_graph(dim, threshold=90, connected=False)
     n_connected = calc_objective(graph, [])
-    k = 8
+    k = 7
 
     print("Dimensione del grafo: {}".format(dim))
     print("Numero di nodi da rimuovere: {}".format(k))
