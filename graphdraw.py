@@ -3,7 +3,7 @@ import time
 import math
 import random
 
-class NetGraph:
+class GraphDraw:
 
     def __init__(self, graph=[], w=800, h=800):
         self.graph = graph
@@ -27,12 +27,14 @@ class NetGraph:
             self.canvas.itemconfig("text{}".format(i), fill="black")
             self.canvas.itemconfig("conn{}".format(i), fill="black")
 
-        self._color_connected(removed)
+        n_connected = self._color_connected(removed)
 
         for i in removed:
             self.canvas.itemconfig("node{}".format(i), outline="#ddd", fill="white")
             self.canvas.itemconfig("text{}".format(i), fill="#ddd")
             self.canvas.itemconfig("conn{}".format(i), fill="#ddd")
+
+        self.canvas.itemconfig("comment", text="Numero di componenti connesse: {}".format(n_connected))
 
         self.master.mainloop()
 
@@ -69,6 +71,8 @@ class NetGraph:
             self.canvas.tag_raise("node{}".format(i))
             self.canvas.tag_raise("text{}".format(i))
 
+        self.canvas.create_text(self.width//2, 8, text="", font=("Helvetica", 12), tags="comment")
+
     
     def _visit_connected(self, i, visited, n, color=None):
         visited[i] = 1
@@ -96,6 +100,8 @@ class NetGraph:
             self._visit_connected(index, visited, n)
             n += 1
 
+        return n
+
 
 if __name__ == "__main__":
     import random
@@ -111,6 +117,6 @@ if __name__ == "__main__":
             graph[i][j] = 0 if val <= threshold else 1
             graph[j][i] = graph[i][j]
 
-    net = NetGraph(graph)
+    net = GraphDraw(graph)
     while 1:
         net.draw(removed=[1, 4, 5])
