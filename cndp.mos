@@ -1,0 +1,51 @@
+!@encoding CP1252
+model ModelName
+uses "mmxprs"; !gain access to the Xpress-Optimizer solver
+
+declarations
+    N_NODES : integer
+    K : integer
+end-declarations
+
+(!
+initializations from "cndp.dat"
+    N_NODES
+    K
+end-initializations
+
+
+declarations
+    NODES = 1..N_NODES
+    ARCHI : array (NODES, NODES) of integer
+    v : array (NODES) of mpvar
+    u : dynamic array (NODES, NODES) of mpvar
+	
+    obiettivo : linctr
+end-declarations
+
+initializations from "cndp.dat"
+    ARCHI
+end-initializations
+
+forall(i, j in NODES | i < j) do
+    create(u(i,j))
+    u(i,j) is_binary
+end-do
+
+forall(i in NODES) v(i) is_binary
+obiettivo := sum(i, j in NODES | exists(u(i,j))) u(i, j)
+
+sum(i in NODES) v(i) <= K
+
+forall(i, j in NODES | ARCHI(i,j) = 1 and exists(u(i,j))) v(i) + v(j) + u(i,j) >= 1
+
+forall(i, j, w in NODES | exists(u(i,j)) and exists(u(i,w)) and exists(u(j,w))) do
+    u(i, j) + u(j, w) - u(i, w) <= 1
+    u(i, j) - u(j, w) + u(i, w) <= 1
+    - u(i, j) + u(j, w) + u(i, w) <= 1
+end-do
+minimize(XPRS_LIN, obiettivo)
+
+writeln("Il costo ottimo è: ", getobjval, "\n")
+!)
+end-model
