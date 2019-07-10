@@ -3,6 +3,7 @@ from graphdraw import GraphDraw
 from greedy import algo_greedy, max_degree_best, min_conn_best, min_conn_ratio_best, create_population
 from graph import create_graph, calc_objective
 from asp import global_optimum
+from minizinc import relaxed_optimum
 from neighbor_search import k_swap, best_1_swap, first_improvement_2_swap, tabu_search
 from genetic_algo import genetic_algo_binary, genetic_algo_removed
 
@@ -24,24 +25,39 @@ def print_solution(removed, sol, opt, calc_time):
     print("Errore assoluto: {}".format(abs_error))
 
 
+def create_dat(graph, k, out="cndp.dat"):
+    with open(out, "w+") as f:
+        f.write("N_NODES : {}\n".format(len(graph)))
+        f.write("K : {}\n".format(k))
+        f.write("ARCHI :\n[{}]".format("\n".join([" ".join([str(c) for c in r]) for r in graph])))
+
+def count_edges(graph):
+    counter = 0
+    for i in range(len(graph)):
+        for j in range(i+1, len(graph)):
+            counter += graph[i][j]
+    return counter
+
+
 if __name__ == '__main__':
     # Dati del problema
-    dim = 30
-    k = 6
-    threshold = 90
+    dim = 75
+    k = 20
+    threshold = 94
     ddraw = False
 
     #Boolean di controllo
-    gglobal_optimum = True
+    gglobal_optimum = False
+    rrelaxed_optimum = True
     max_degree = True
     min_connection = True
     min_connection_ratio = True
-    random_k_swap = True
-    bbest_1_swap = True
+    random_k_swap = False
+    bbest_1_swap = False
     fi_2_swap = False
-    tabu = True
-    variable_neighborhood_search = True
-    multistart_search = True
+    tabu = False
+    variable_neighborhood_search = False
+    multistart_search = False
     genetic_removed = True
     genetic_binary = True
     save = False
@@ -71,9 +87,12 @@ if __name__ == '__main__':
 
 
     graph = create_graph(dim, threshold=threshold, connected=False)
+    create_dat(graph, k)
     n_connected = calc_objective(graph, [])
+    n_edges = count_edges(graph)
 
     print("Dimensione del grafo: {}".format(dim))
+    print("Numero di archi: {}".format(n_edges))
     print("Numero di nodi da rimuovere: {}".format(k))
     print("Componenti connesse nel grafo di partenza: {}".format(n_connected))
 
@@ -85,6 +104,7 @@ if __name__ == '__main__':
     # Ottimo globale
     print("\n-------------------------------------\n")
     if gglobal_optimum:
+        print("Ottimo globale")
         start_time = time.time()
         opt, opt_removed = global_optimum(graph, k)
         calc_time = time.time() - start_time
@@ -101,6 +121,22 @@ if __name__ == '__main__':
     else:
         opt = 1
 
+    
+    # Ottimo rilassato
+    if rrelaxed_optimum:
+        print("Ottimo rilassato")
+        start_time = time.time()
+        sol_mzn, removed_mzn = relaxed_optimum(graph, k)
+        calc_time = time.time() - start_time
+        opt = calc_objective(graph, removed_mzn)
+
+        print("Soluzione rilassata: {}".format(sol_mzn))
+        print("Ottimo rilassato: {}".format(opt))
+        print("Nodi rimossi: {}".format(removed_mzn))
+        print("Tempo di calcolo (in sec): %.3f" % calc_time)
+        
+        print("\n-------------------------------------\n")
+
     # Applichiamo le greeedy
     
     if max_degree or random_k_swap or bbest_1_swap or fi_2_swap or tabu:
@@ -110,7 +146,7 @@ if __name__ == '__main__':
         max_degree_sol = calc_objective(graph, max_degree_removed)
 
         calc_time = time.time() - start_time
-        
+
         print_solution(max_degree_removed, max_degree_sol, opt, calc_time)
 
         if ddraw:

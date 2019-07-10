@@ -7,7 +7,6 @@ declarations
     K : integer
 end-declarations
 
-(!
 initializations from "cndp.dat"
     N_NODES
     K
@@ -33,6 +32,7 @@ forall(i, j in NODES | i < j) do
 end-do
 
 forall(i in NODES) v(i) is_binary
+
 obiettivo := sum(i, j in NODES | exists(u(i,j))) u(i, j)
 
 sum(i in NODES) v(i) <= K
@@ -44,8 +44,12 @@ forall(i, j, w in NODES | exists(u(i,j)) and exists(u(i,w)) and exists(u(j,w))) 
     u(i, j) - u(j, w) + u(i, w) <= 1
     - u(i, j) + u(j, w) + u(i, w) <= 1
 end-do
+
 minimize(XPRS_LIN, obiettivo)
 
-writeln("Il costo ottimo Ã¨: ", getobjval, "\n")
-!)
+writeln("Il costo ottimo è: ", getobjval, "\n")
+forall(i in NODES | getsol(v(i)) > 0) do
+	writeln("Cancellato ", i-1, ": ", getsol(v(i)))
+end-do
+
 end-model
