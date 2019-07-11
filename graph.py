@@ -17,6 +17,26 @@ def create_graph(n, threshold = 50, connected=True):
             return graph
 
 
+def create_graph_with_n_edges(n, edges=None):
+    if edges is None:
+        edges = 3 * n
+    if edges > (n*n - n)//2:
+        edges = (n*n - n)//2
+
+    graph = [[0 for i in range(n)] for j in range(n)]
+    for e in range(edges):
+        i = random.randint(0, n - 2)
+        j = random.randint(i + 1, n - 1)
+
+        while graph[i][j] == 1:
+            i = random.randint(0, n - 2)
+            j = random.randint(i + 1, n - 1)
+            
+        graph[i][j] = 1
+        graph[j][i] = graph[i][j]
+
+    return graph
+
 def visit_connected(graph, i, visited):
     visited[i] = 1
     row = graph[i]

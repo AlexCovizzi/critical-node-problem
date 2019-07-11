@@ -58,13 +58,16 @@ def min_conn_best(graph, removed, k=1):
         
         best_couples.append(cur_best_couple)
     
-    # restituisco il nodo con grado maggiore nella coppia
-    random.shuffle(best_couples)
-    cur_best_couple = best_couples[0]
-    if deg_vertices[cur_best_couple[0]] > deg_vertices[cur_best_couple[1]]:
-        return cur_best_couple[0]
+    if best_couples[0]:
+        # restituisco il nodo con grado maggiore nella coppia
+        random.shuffle(best_couples)
+        cur_best_couple = best_couples[0]
+        if deg_vertices[cur_best_couple[0]] > deg_vertices[cur_best_couple[1]]:
+            return cur_best_couple[0]
+        else:
+            return cur_best_couple[1]
     else:
-        return cur_best_couple[1]
+        return max_degree_best(graph, removed, k)
 
 
 def min_conn_ratio_best(graph, removed, k=1):
@@ -90,10 +93,13 @@ def min_conn_ratio_best(graph, removed, k=1):
             
         best_couples.append(cur_best_couple)
     
-    # restituisco il nodo con grado maggiore nella coppia
-    random.shuffle(best_couples)
-    cur_best_couple = best_couples[0]
-    if deg_vertices[cur_best_couple[0]] > deg_vertices[cur_best_couple[1]]:
-        return cur_best_couple[0]
+    if best_couples[0]:
+        # restituisco il nodo con grado maggiore nella coppia
+        random.shuffle(best_couples)
+        cur_best_couple = best_couples[0]
+        if deg_vertices[cur_best_couple[0]] > deg_vertices[cur_best_couple[1]]:
+            return cur_best_couple[0]
+        else:
+            return cur_best_couple[1]
     else:
-        return cur_best_couple[1]
+        return max_degree_best(graph, removed, k)

@@ -42,7 +42,8 @@ def relaxed_optimum(graph, k, mzn_name="problema.mzn"):
             f.readline()
         second_line = f.readline()
         removed = json.loads(first_line)
-        removed = [i for i,v in enumerate(removed) if v > 0.2]
+        threshold = (len(graph) - len([r for r in removed if r > 0]) - k) / len(graph)
+        removed = [i for i,v in enumerate(removed) if v > threshold]
         sol = float(second_line)
     
     return sol, removed

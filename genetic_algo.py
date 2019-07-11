@@ -62,13 +62,13 @@ def genetic_algo_removed(graph, pop, n_parents=2, max_generations=100):
             for idx, gene in enumerate(child_1):
                 if child_1.count(gene) > 1:
                     new_gene = random.randint(0, len(left) - 1)
-                    while new_gene in child_1:
+                    while left[new_gene] in child_1:
                         new_gene = random.randint(0, len(left) - 1)
                     child_1[idx] = left[new_gene]
             for idx, gene in enumerate(child_2):
                 if child_2.count(gene) > 1:
                     new_gene = random.randint(0, len(left) - 1)
-                    while new_gene in child_2:
+                    while left[new_gene] in child_2:
                         new_gene = random.randint(0, len(left) - 1)
                     child_2[idx] = left[new_gene]
 

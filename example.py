@@ -1,7 +1,7 @@
 import time
 from graphdraw import GraphDraw
 from greedy import algo_greedy, max_degree_best, min_conn_best, min_conn_ratio_best, create_population
-from graph import create_graph, calc_objective
+from graph import create_graph, calc_objective, create_graph_with_n_edges
 from asp import global_optimum
 from minizinc import relaxed_optimum
 from neighbor_search import k_swap, best_1_swap, first_improvement_2_swap, tabu_search
@@ -41,33 +41,35 @@ def count_edges(graph):
 
 if __name__ == '__main__':
     # Dati del problema
-    dim = 75
-    k = 20
-    threshold = 94
-    ddraw = False
+    dim = 10
+    k = 3
+    threshold = None
+    cconnected = True
+    n_edges = 10000000
+    ddraw = True
 
     #Boolean di controllo
-    gglobal_optimum = False
-    rrelaxed_optimum = True
+    gglobal_optimum = True
+    rrelaxed_optimum = False
     max_degree = True
     min_connection = True
     min_connection_ratio = True
-    random_k_swap = False
-    bbest_1_swap = False
-    fi_2_swap = False
-    tabu = False
-    variable_neighborhood_search = False
-    multistart_search = False
-    genetic_removed = True
+    random_k_swap = True
+    bbest_1_swap = True
+    fi_2_swap = True
+    tabu = True
+    variable_neighborhood_search = True
+    multistart_search = True
+    ggenetic_removed = True
     genetic_binary = True
     save = False
 
     # Parametri del Random K-Swap
-    k_s = k // 2
+    k_s = k // 2 if k // 2 > 0 else 1
     n_iter = 100
 
-    #Parametri della Tabu Search
-    n_tabu = k // 2
+    # Parametri della Tabu Search
+    n_tabu = k // 2 if k // 2 > 0 else 1
     n_stall = 100
 
     # Parametri della Variable Neighborhood Search
@@ -85,8 +87,10 @@ if __name__ == '__main__':
     n_parents = 8
     max_generations = 500
 
-
-    graph = create_graph(dim, threshold=threshold, connected=False)
+    if threshold:
+        graph = create_graph(dim, threshold=threshold, connected=cconnected)
+    else:
+        graph = create_graph_with_n_edges(dim, edges=n_edges)
     create_dat(graph, k)
     n_connected = calc_objective(graph, [])
     n_edges = count_edges(graph)
@@ -380,7 +384,7 @@ if __name__ == '__main__':
 
         print("Generiamo un totale di {} generazioni e ad ogni generazione verranno scelti {} genitori\n".format(max_generations, n_parents))
 
-    if genetic_removed:
+    if ggenetic_removed:
         print("\nAlgoritmo genetico, codifica: vettore a {} interi".format(k))
 
         start_time = time.time()
@@ -401,7 +405,7 @@ if __name__ == '__main__':
 
         start_time = time.time()
         genetic_bin_removed = genetic_algo_binary(graph, population, n_parents, max_generations)
-        genetic_bin_sol = calc_objective(graph, genetic_removed)
+        genetic_bin_sol = calc_objective(graph, genetic_bin_removed)
 
         calc_time = time.time() - start_time
         

@@ -1,6 +1,6 @@
 import time
 from greedy import algo_greedy, max_degree_best, min_conn_best, min_conn_ratio_best, create_population
-from graph import create_graph, calc_objective
+from graph import create_graph, calc_objective, create_graph_with_n_edges
 from asp import global_optimum
 
 
@@ -13,7 +13,10 @@ def calc_errors(opt, sol):
 if __name__ == "__main__":
     dim = 30
     k = 6
-    threshold = 90
+    threshold = None
+    cconected = False
+    n_edges = 75
+    
     n_iter = 20
 
     max_degree_time = 0
@@ -29,7 +32,10 @@ if __name__ == "__main__":
     min_conn_ratio_rel_err = 0
 
     for i in range(n_iter):
-        graph = create_graph(dim, threshold=threshold, connected=False)
+        if threshold:
+            graph = create_graph(dim, threshold=threshold, connected=cconnected)
+        else:
+            graph = create_graph_with_n_edges(dim, edges=n_edges)
         n_connected = calc_objective(graph, [])
 
         opt, _ = global_optimum(graph, k)
@@ -70,20 +76,20 @@ if __name__ == "__main__":
     # Stampa dei risultati
     print("Max Degree")
     print("Errore Assoluto medio: %.4f" % (max_degree_abs_err/n_iter))
-    print("Errore Relativo medio: %.4f" % (max_degree_rel_err/n_iter))
+    print("Errore Relativo medio: %.4f %%" % (max_degree_rel_err/n_iter))
     print("Tempo di calcolo medio: %.4f" % (max_degree_time/n_iter))
 
     print("\n-------------------------------------\n")
 
     print("Min Connection")
     print("Errore Assoluto medio: %.4f" % (min_conn_abs_err/n_iter))
-    print("Errore Relativo medio: %.4f" % (min_conn_rel_err/n_iter))
+    print("Errore Relativo medio: %.4f %%" % (min_conn_rel_err/n_iter))
     print("Tempo di calcolo medio: %.4f" % (min_conn_time/n_iter))
 
     print("\n-------------------------------------\n")
 
     print("Min Connection Ratio")
     print("Errore Assoluto medio: %.4f" % (min_conn_ratio_abs_err/n_iter))
-    print("Errore Relativo medio: %.4f" % (min_conn_ratio_rel_err/n_iter))
+    print("Errore Relativo medio: %.4f %%" % (min_conn_ratio_rel_err/n_iter))
     print("Tempo di calcolo medio: %.4f" % (min_conn_ratio_time/n_iter))
     
