@@ -11,13 +11,13 @@ def calc_errors(opt, sol):
 
 
 if __name__ == "__main__":
-    dim = 30
-    k = 6
+    dim = 75
+    k = 12
     threshold = None
     cconected = False
-    n_edges = 75
+    n_edges = 120
     
-    n_iter = 20
+    n_iter = 1
 
     max_degree_time = 0
     min_conn_time = 0

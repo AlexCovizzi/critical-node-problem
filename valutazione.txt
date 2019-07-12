@@ -1,0 +1,71 @@
+1.
+    dim = 30
+    k = 8
+    n_edges = 90
+    n_iter = 500
+
+    K-Swap:
+        - k_s = 4
+        - iter = 1000
+    Tabu:
+        - n_tabu = 4
+        - n_stall = 200
+    MSS:
+        - mss_n_start = 100
+        - mss_greedy_best = max_degree_best
+        - mss_stoc_dim = 20
+        - mss_move = best_1_swap
+    Genetici:
+        - pop_dim = 30
+        - stoc_dim = 6
+        - n_parents = 8
+        - max_generations = 500
+        - bests = [max_degree_best, min_conn_best]
+
+2.
+    dim = 50
+    k = 12
+    n_edges = 120
+    n_iter = 200
+
+    K-Swap:
+        - k_s = 6
+        - iter = 1000
+    Tabu:
+        - n_tabu = 4
+        - n_stall = 200
+    MSS:
+        - mss_n_start = 100
+        - mss_greedy_best = max_degree_best
+        - mss_stoc_dim = 20
+        - mss_move = best_1_swap
+    Genetici:
+        - pop_dim = 40
+        - stoc_dim = 7
+        - n_parents = 12
+        - max_generations = 500
+        - bests = [max_degree_best, min_conn_best, min_conn_ratio_best]
+
+3.
+    dim = 75
+    k = 12
+    n_edges = 120
+    n_iter = 100
+
+    K-Swap:
+        - k_s = 8
+        - iter = 1000
+    Tabu:
+        - n_tabu = 6
+        - n_stall = 200
+    MSS:
+        - mss_n_start = 100
+        - mss_greedy_best = max_degree_best
+        - mss_stoc_dim = 20
+        - mss_move = best_1_swap
+    Genetici:
+        - pop_dim = 60
+        - stoc_dim = 10
+        - n_parents = 20
+        - max_generations = 500
+        - bests = [max_degree_best, min_conn_best, min_conn_ratio_best]

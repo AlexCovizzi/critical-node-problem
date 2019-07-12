@@ -22,15 +22,15 @@ def print_asp(graph, rem, out="problema.pl"):
 def global_optimum(graph, k, asp_name="problema.pl"):
     print_asp(graph, k, asp_name)
 
-    asp_output = subprocess.run(['clingo', asp_name], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    asp_output = subprocess.run(['clingo', '--configuration=trendy', '-t', '4', asp_name], stdout=subprocess.PIPE).stdout.decode('utf-8')
     with open("asp-output", "w") as f:
         f.write(asp_output)
     
     with open("asp-output", "r") as f:
         if sys.platform.startswith('win'):
-            result = f.readlines()[-20]
+            result = f.readlines()[-22]
         else:
-            result = f.readlines()[-10]
+            result = f.readlines()[-12]
     
     atoms = result.split()
     asp_removed = []

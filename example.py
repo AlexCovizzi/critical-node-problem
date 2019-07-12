@@ -1,7 +1,7 @@
 import time
 from graphdraw import GraphDraw
 from greedy import algo_greedy, max_degree_best, min_conn_best, min_conn_ratio_best, create_population
-from graph import create_graph, calc_objective, create_graph_with_n_edges
+from graph import create_graph, calc_objective, create_graph_with_n_edges, calc_alt_objective
 from asp import global_optimum
 from minizinc import relaxed_optimum
 from neighbor_search import k_swap, best_1_swap, first_improvement_2_swap, tabu_search
@@ -41,26 +41,26 @@ def count_edges(graph):
 
 if __name__ == '__main__':
     # Dati del problema
-    dim = 10
-    k = 3
+    dim = 60
+    k = 10
     threshold = None
     cconnected = True
-    n_edges = 10000000
-    ddraw = True
+    n_edges = 120
+    ddraw = False
 
     #Boolean di controllo
     gglobal_optimum = True
-    rrelaxed_optimum = False
-    max_degree = True
-    min_connection = True
-    min_connection_ratio = True
-    random_k_swap = True
-    bbest_1_swap = True
-    fi_2_swap = True
-    tabu = True
-    variable_neighborhood_search = True
-    multistart_search = True
-    ggenetic_removed = True
+    rrelaxed_optimum = True
+    max_degree = False
+    min_connection = False
+    min_connection_ratio = False
+    random_k_swap = False
+    bbest_1_swap = False
+    fi_2_swap = False
+    tabu = False
+    variable_neighborhood_search = False
+    multistart_search = False
+    ggenetic_removed = False
     genetic_binary = True
     save = False
 
@@ -91,7 +91,6 @@ if __name__ == '__main__':
         graph = create_graph(dim, threshold=threshold, connected=cconnected)
     else:
         graph = create_graph_with_n_edges(dim, edges=n_edges)
-    create_dat(graph, k)
     n_connected = calc_objective(graph, [])
     n_edges = count_edges(graph)
 
@@ -111,12 +110,16 @@ if __name__ == '__main__':
         print("Ottimo globale")
         start_time = time.time()
         opt, opt_removed = global_optimum(graph, k)
+        global_alt_sol = calc_alt_objective(graph, opt_removed)
+
         calc_time = time.time() - start_time
 
         opt_removed.sort()
         print("Ottimo globale: {}".format(opt))
         print("Nodi rimossi: {}".format(opt_removed))
         print("Tempo di calcolo (in sec): %.3f" % calc_time)
+        
+        print("Soluzione alternativa: {}".format(global_alt_sol))
 
         if ddraw:
             draw.show(opt_removed)
@@ -132,10 +135,10 @@ if __name__ == '__main__':
         start_time = time.time()
         sol_mzn, removed_mzn = relaxed_optimum(graph, k)
         calc_time = time.time() - start_time
-        opt = calc_objective(graph, removed_mzn)
+        relaxed_opt = calc_objective(graph, removed_mzn)
 
         print("Soluzione rilassata: {}".format(sol_mzn))
-        print("Ottimo rilassato: {}".format(opt))
+        print("Ottimo rilassato: {}".format(relaxed_opt))
         print("Nodi rimossi: {}".format(removed_mzn))
         print("Tempo di calcolo (in sec): %.3f" % calc_time)
         
@@ -333,7 +336,7 @@ if __name__ == '__main__':
         
         print_solution(vns_removed, vns_sol, opt, calc_time)
 
-        improvement = k_swap_sol - vns_sol
+        improvement = vns_sol - max_degree_sol
         print("Miglioramento: {}".format(improvement))
 
         if ddraw:
@@ -406,10 +409,12 @@ if __name__ == '__main__':
         start_time = time.time()
         genetic_bin_removed = genetic_algo_binary(graph, population, n_parents, max_generations)
         genetic_bin_sol = calc_objective(graph, genetic_bin_removed)
+        genetic_bin_alt_sol = calc_alt_objective(graph, genetic_bin_removed)
 
         calc_time = time.time() - start_time
         
         print_solution(genetic_bin_removed, genetic_bin_sol, opt, calc_time)
+        print("Soluzione alternativa: {}".format(genetic_bin_alt_sol))
 
         if ddraw:
             draw.show(genetic_bin_removed)
