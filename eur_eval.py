@@ -21,12 +21,12 @@ def print_results(n_iter, abs_err, rel_err, time, improvement=None):
 if __name__ == "__main__":
     # Parametri del problema
     dim = 30
-    k = 6
+    k = 68
     threshold = None
-    cconected = False
-    n_edges = 75
+    cconnected = False
+    n_edges = 90
 
-    eval_iter = 10
+    eval_iter = 500
 
     # Performance della Best 1-Swap
     best_1_swap_time = 0
@@ -35,8 +35,8 @@ if __name__ == "__main__":
     best_1_swap_rel_improvement = 0
 
     # Parametri del Random K-Swap
-    k_s = k // 2 if k // 2 > 0 else 1
-    n_iter = 100
+    k_s = 4
+    n_iter = 1000
     # Performance della Random K-Swap
     k_swap_time = 0
     k_swap_abs_err = 0
@@ -50,8 +50,8 @@ if __name__ == "__main__":
     two_swap_rel_improvement = 0
 
     # Parametri della Tabu Search
-    n_tabu = k // 2 if k // 2 > 0 else 1
-    n_stall = 100
+    n_tabu = 4
+    n_stall = 200
     # Performance della Tabu Search
     tabu_time = 0
     tabu_abs_err = 0
@@ -67,9 +67,9 @@ if __name__ == "__main__":
     vns_rel_improvement = 0
 
     # Parametri della Multistart Search
-    mss_n_start = 10
+    mss_n_start = 100
     mss_greedy_best = max_degree_best
-    mss_stoc_dim = 5
+    mss_stoc_dim = 20
     mss_move = best_1_swap
     # Performance della Variable Neighborhood Search
     mss_time = 0

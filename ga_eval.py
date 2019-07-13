@@ -18,20 +18,20 @@ def print_results(n_iter, abs_err, rel_err, time):
 
 
 if __name__ == "__main__":
-    dim = 40
-    k = 7
+    dim = 30
+    k = 8
     threshold = None
-    cconected = False
-    n_edges = 80
+    cconnected = False
+    n_edges = 90
     
-    n_iter = 10
+    n_iter = 500
     
     # Parametri degli Algoritmi Genetici
     pop_dim = 30
-    stoc_dim = 5
+    stoc_dim = 6
     n_parents = 8
     max_generations = 500
-    bests = [max_degree_best, min_conn_best, min_conn_ratio_best]
+    bests = [max_degree_best, min_conn_best]
 
     ga_bin_abs_err = 0
     ga_bin_rel_err = 0

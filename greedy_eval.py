@@ -11,13 +11,13 @@ def calc_errors(opt, sol):
 
 
 if __name__ == "__main__":
-    dim = 75
-    k = 12
+    dim = 30
+    k = 8
     threshold = None
-    cconected = False
-    n_edges = 120
+    cconnected = False
+    n_edges = 90
     
-    n_iter = 1
+    n_iter = 500
 
     max_degree_time = 0
     min_conn_time = 0
@@ -32,6 +32,7 @@ if __name__ == "__main__":
     min_conn_ratio_rel_err = 0
 
     for i in range(n_iter):
+        print("Iterazione {}".format(i + 1))
         if threshold:
             graph = create_graph(dim, threshold=threshold, connected=cconnected)
         else:
