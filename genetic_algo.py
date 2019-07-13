@@ -2,6 +2,25 @@ import random
 from graph import calc_objective
 
 
+def calc_dist(pop):
+    def dist(p1, p2):
+        d = 0
+        for i in p1:
+            if i not in p2:
+                d += 1
+        return d
+    # [1,3,5] - [2,4,5] -> d = 2
+    D = []
+    for i in range(len(pop)):
+        for j in range(i + 1, len(pop)):
+            p1 = pop[i]
+            p2 = pop[j]
+            d = dist(p1, p2)
+            D.append(d)
+    
+    return sum(D) / len(D)
+
+
 # Come codifica, usiamo un vettore di k interi, con k numero di nodi rimossi
 def genetic_algo_removed(graph, pop, n_parents=2, max_generations=100):
     # deep copy popolazione

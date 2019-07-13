@@ -41,11 +41,11 @@ def count_edges(graph):
 
 if __name__ == '__main__':
     # Dati del problema
-    dim = 60
+    dim = 70
     k = 10
     threshold = None
     cconnected = True
-    n_edges = 120
+    n_edges = 130
     ddraw = False
 
     #Boolean di controllo
@@ -384,6 +384,8 @@ if __name__ == '__main__':
     if genetic_algo_binary or genetic_algo_removed:
         print("Creiamo una popolazione di {} individui per gli algoritmi genetici".format(pop_dim))
         population = create_population(graph, k, pop_dim, [max_degree_best, min_conn_best, min_conn_ratio_best], stoc_dim)
+        pop_dist = calc_dist(population)
+        print("La popolazione ha una distanza media di %.4f" % pop_dist)
 
         print("Generiamo un totale di {} generazioni e ad ogni generazione verranno scelti {} genitori\n".format(max_generations, n_parents))
 

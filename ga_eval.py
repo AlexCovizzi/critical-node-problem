@@ -1,7 +1,7 @@
 import time
 from greedy import algo_greedy, max_degree_best, min_conn_best, min_conn_ratio_best, create_population
 from graph import create_graph, calc_objective, create_graph_with_n_edges
-from genetic_algo import genetic_algo_binary, genetic_algo_removed
+from genetic_algo import genetic_algo_binary, genetic_algo_removed, calc_dist
 from asp import global_optimum
 
 
@@ -33,6 +33,8 @@ if __name__ == "__main__":
     max_generations = 500
     bests = [max_degree_best, min_conn_best]
 
+    pop_dist = 0
+
     ga_bin_abs_err = 0
     ga_bin_rel_err = 0
     ga_bin_time = 0
@@ -52,6 +54,7 @@ if __name__ == "__main__":
         opt, _ = global_optimum(graph, k)
         
         population = create_population(graph, k, pop_dim, bests, stoc_dim)
+        pop_dist += calc_dist(population)
 
         # Valutazione della Genetic Algo (Rappresentazione k interi)
         start_time = time.time()
@@ -74,6 +77,10 @@ if __name__ == "__main__":
         ga_bin_abs_err += abs_error
         ga_bin_rel_err += rel_error
         ga_bin_time += calc_time
+        
+    print("\n-------------------------------------\n")
+
+    print("Distanza media della popolazione: %.4f" % (pop_dist))
     
     print("\n-------------------------------------\n")
 
