@@ -20,13 +20,13 @@ def print_results(n_iter, abs_err, rel_err, time, improvement=None):
 
 if __name__ == "__main__":
     # Parametri del problema
-    dim = 30
-    k = 68
+    dim = 70
+    k = 10
     threshold = None
     cconnected = False
-    n_edges = 90
+    n_edges = 120
 
-    eval_iter = 500
+    eval_iter = 100
 
     # Performance della Best 1-Swap
     best_1_swap_time = 0
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     best_1_swap_rel_improvement = 0
 
     # Parametri del Random K-Swap
-    k_s = 4
+    k_s = 8
     n_iter = 1000
     # Performance della Random K-Swap
     k_swap_time = 0
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     two_swap_rel_improvement = 0
 
     # Parametri della Tabu Search
-    n_tabu = 4
+    n_tabu = 6
     n_stall = 200
     # Performance della Tabu Search
     tabu_time = 0
@@ -86,7 +86,7 @@ if __name__ == "__main__":
             graph = create_graph_with_n_edges(dim, edges=n_edges)
         n_connected = calc_objective(graph, [])
 
-        opt, _ = global_optimum(graph, k)
+        opt, _ = global_optimum(graph, k, "eur_eval.pl", "eur-out")
 
         # genero la soluzione di partenza (Max Degree)
         start_removed = algo_greedy(graph, k, max_degree_best)

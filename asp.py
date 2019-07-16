@@ -19,14 +19,14 @@ def print_asp(graph, rem, out="problema.pl"):
             f.write(text)
 
 
-def global_optimum(graph, k, asp_name="problema.pl"):
+def global_optimum(graph, k, asp_name="problema.pl", output="asp-output"):
     print_asp(graph, k, asp_name)
 
     asp_output = subprocess.run(['clingo', '--configuration=trendy', '-t', '4', asp_name], stdout=subprocess.PIPE).stdout.decode('utf-8')
-    with open("asp-output", "w") as f:
+    with open(output, "w") as f:
         f.write(asp_output)
     
-    with open("asp-output", "r") as f:
+    with open(output, "r") as f:
         if sys.platform.startswith('win'):
             result = f.readlines()[-22]
         else:

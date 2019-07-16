@@ -22,11 +22,100 @@
         - max_generations = 500
         - bests = [max_degree_best, min_conn_best]
 
+
+    -------------------------------------
+
+    Max Degree
+    Errore Assoluto medio: 3.0840
+    Errore Relativo medio: 57.5485 %
+    Tempo di calcolo medio: 0.0019
+
+    -------------------------------------
+
+    Min Connection
+    Errore Assoluto medio: 2.2860
+    Errore Relativo medio: 41.7811 %
+    Tempo di calcolo medio: 0.0029
+
+    -------------------------------------
+
+    Min Connection Ratio
+    Errore Assoluto medio: 0.5060
+    Errore Relativo medio: 9.3043 %
+    Tempo di calcolo medio: 0.0029
+    
+    -------------------------------------
+
+    Best 1-Swap
+    Errore Assoluto medio: 0.7920
+    Errore Relativo medio: 15.0848 %
+    Miglioramento Relativo medio: 49.2083 %
+    Tempo di calcolo medio: 0.0484
+
+    -------------------------------------
+
+    Random K-Swap
+    Errore Assoluto medio: 1.3520
+    Errore Relativo medio: 24.6986 %
+    Miglioramento Relativo medio: 42.8986 %
+    Tempo di calcolo medio: 0.1116
+
+    -------------------------------------
+
+    First-Improvement 2-Swap
+    Errore Assoluto medio: 0.4180
+    Errore Relativo medio: 7.5390 %
+    Miglioramento Relativo medio: 53.6455 %
+    Tempo di calcolo medio: 2.8016
+
+    -------------------------------------
+
+    Tabu Search
+    Errore Assoluto medio: 0.2700
+    Errore Relativo medio: 5.1386 %
+    Miglioramento Relativo medio: 54.8364 %
+    Tempo di calcolo medio: 2.8805
+
+    -------------------------------------
+
+    Variable Neighborhood Search
+    Errore Assoluto medio: 0.2720
+    Errore Relativo medio: 5.0414 %
+    Miglioramento Relativo medio: 54.8493 %
+    Tempo di calcolo medio: 2.4828
+
+    -------------------------------------
+
+    Multistart Search
+    Errore Assoluto medio: 1.6640
+    Errore Relativo medio: 31.3562 %
+    Tempo di calcolo medio: 4.4065
+    
+    -------------------------------------
+
+    Distanza media della popolazione: 1.9835
+
+    -------------------------------------
+
+    Algoritmo Genetico - Codifica: Vettore a k interi
+    Errore Assoluto medio: 0.0900
+    Errore Relativo medio: 1.7165 %
+    Tempo di calcolo medio: 1.6918
+
+    -------------------------------------
+
+    Algoritmo Genetico - Codifica: Vettore binario
+    Errore Assoluto medio: 0.1220
+    Errore Relativo medio: 2.2571 %
+    Tempo di calcolo medio: 1.5057
+
+--------------------------------------------------------------------------------------------------
+
 2.
     dim = 50
     k = 12
     n_edges = 120
-    n_iter = 200
+    n_iter = 250
 
     K-Swap:
         - k_s = 6
@@ -46,9 +135,97 @@
         - max_generations = 500
         - bests = [max_degree_best, min_conn_best, min_conn_ratio_best]
 
+    -------------------------------------
+
+    Max Degree
+    Errore Assoluto medio: 5.0640
+    Errore Relativo medio: 43.9958 %
+    Tempo di calcolo medio: 0.0061
+
+    -------------------------------------
+
+    Min Connection
+    Errore Assoluto medio: 4.8760
+    Errore Relativo medio: 41.7346 %
+    Tempo di calcolo medio: 0.0087
+
+    -------------------------------------
+
+    Min Connection Ratio
+    Errore Assoluto medio: 1.2760
+    Errore Relativo medio: 11.0587 %
+    Tempo di calcolo medio: 0.0088
+
+    -------------------------------------
+
+    Best 1-Swap
+    Errore Assoluto medio: 1.3640
+    Errore Relativo medio: 12.1638 %
+    Miglioramento Relativo medio: 37.4251 %
+    Tempo di calcolo medio: 0.3156
+
+    -------------------------------------
+
+    Random K-Swap
+    Errore Assoluto medio: 3.6000
+    Errore Relativo medio: 31.6987 %
+    Miglioramento Relativo medio: 19.8328 %
+    Tempo di calcolo medio: 0.2301
+
+    -------------------------------------
+
+    First-Improvement 2-Swap
+    Errore Assoluto medio: 0.5520
+    Errore Relativo medio: 4.9648 %
+    Miglioramento Relativo medio: 42.3042 %
+    Tempo di calcolo medio: 49.7354
+
+    -------------------------------------
+
+    Tabu Search
+    Errore Assoluto medio: 0.5800
+    Errore Relativo medio: 5.1499 %
+    Miglioramento Relativo medio: 42.1262 %
+    Tempo di calcolo medio: 17.4120
+
+    -------------------------------------
+
+    Variable Neighborhood Search
+    Errore Assoluto medio: 0.5160
+    Errore Relativo medio: 4.6032 %
+    Miglioramento Relativo medio: 42.5874 %
+    Tempo di calcolo medio: 40.7712
+
+    -------------------------------------
+
+    Multistart Search
+    Errore Assoluto medio: 1.6000
+    Errore Relativo medio: 14.2059 %
+    Tempo di calcolo medio: 46.9189
+
+    -------------------------------------
+
+    Distanza media della popolazione: 5.4981
+
+    -------------------------------------
+
+    Algoritmo Genetico - Codifica: Vettore a k interi
+    Errore Assoluto medio: 0.1600
+    Errore Relativo medio: 1.3924 %
+    Tempo di calcolo medio: 5.2642
+
+    -------------------------------------
+
+    Algoritmo Genetico - Codifica: Vettore binario
+    Errore Assoluto medio: 0.1840
+    Errore Relativo medio: 1.6051 %
+    Tempo di calcolo medio: 4.6289
+
+--------------------------------------------------------------------------------------------------
+
 3.
-    dim = 75
-    k = 12
+    dim = 70
+    k = 10
     n_edges = 120
     n_iter = 100
 
@@ -69,3 +246,89 @@
         - n_parents = 20
         - max_generations = 500
         - bests = [max_degree_best, min_conn_best, min_conn_ratio_best]
+
+    -------------------------------------
+
+    Max Degree
+    Errore Assoluto medio: 5.0800
+    Errore Relativo medio: 29.8720 %
+    Tempo di calcolo medio: 0.0099
+
+    -------------------------------------
+
+    Min Connection
+    Errore Assoluto medio: 5.6000
+    Errore Relativo medio: 32.3407 %
+    Tempo di calcolo medio: 0.0132
+
+    -------------------------------------
+
+    Min Connection Ratio
+    Errore Assoluto medio: 1.7000
+    Errore Relativo medio: 9.9620 %
+    Tempo di calcolo medio: 0.0121
+
+    -------------------------------------
+
+    Best 1-Swap
+    Errore Assoluto medio: 1.0000
+    Errore Relativo medio: 6.0075 %
+    Miglioramento Relativo medio: 26.1820 %
+    Tempo di calcolo medio: 0.8274
+
+    -------------------------------------
+
+    Random K-Swap
+    Errore Assoluto medio: 4.6300
+    Errore Relativo medio: 26.9760 %
+    Miglioramento Relativo medio: 5.0524 %
+    Tempo di calcolo medio: 0.4179
+
+    -------------------------------------
+
+    First-Improvement 2-Swap
+    Errore Assoluto medio: 0.3900
+    Errore Relativo medio: 2.3396 %
+    Miglioramento Relativo medio: 28.9139 %
+    Tempo di calcolo medio: 172.8131
+
+    -------------------------------------
+
+    Tabu Search
+    Errore Assoluto medio: 0.5300
+    Errore Relativo medio: 3.1788 %
+    Miglioramento Relativo medio: 28.2586 %
+    Tempo di calcolo medio: 45.2784
+
+    -------------------------------------
+
+    Variable Neighborhood Search
+    Errore Assoluto medio: 0.4000
+    Errore Relativo medio: 2.4488 %
+    Miglioramento Relativo medio: 28.8551 %
+    Tempo di calcolo medio: 137.8055
+
+    -------------------------------------
+
+    Multistart Search
+    Errore Assoluto medio: 1.4800
+    Errore Relativo medio: 8.6779 %
+    Tempo di calcolo medio: 114.5965
+
+    -------------------------------------
+
+    Distanza media della popolazione: 5.7480
+
+    -------------------------------------
+
+    Algoritmo Genetico - Codifica: Vettore a k interi
+    Errore Assoluto medio: 0.1100
+    Errore Relativo medio: 0.6542 %
+    Tempo di calcolo medio: 15.5472
+
+    -------------------------------------
+
+    Algoritmo Genetico - Codifica: Vettore binario
+    Errore Assoluto medio: 0.2000
+    Errore Relativo medio: 1.1552 %
+    Tempo di calcolo medio: 13.6835

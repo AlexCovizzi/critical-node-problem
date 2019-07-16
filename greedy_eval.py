@@ -11,13 +11,13 @@ def calc_errors(opt, sol):
 
 
 if __name__ == "__main__":
-    dim = 30
-    k = 8
+    dim = 70
+    k = 10
     threshold = None
     cconnected = False
-    n_edges = 90
+    n_edges = 120
     
-    n_iter = 500
+    n_iter = 100
 
     max_degree_time = 0
     min_conn_time = 0
@@ -39,7 +39,7 @@ if __name__ == "__main__":
             graph = create_graph_with_n_edges(dim, edges=n_edges)
         n_connected = calc_objective(graph, [])
 
-        opt, _ = global_optimum(graph, k)
+        opt, _ = global_optimum(graph, k, "greedy_eval.pl", "greedy-out")
 
         # Valutazione della Max Degree Best
         start_time = time.time()
@@ -74,6 +74,8 @@ if __name__ == "__main__":
         min_conn_ratio_rel_err += rel_error
         min_conn_ratio_time += calc_time
     
+    print("\n-------------------------------------\n")
+
     # Stampa dei risultati
     print("Max Degree")
     print("Errore Assoluto medio: %.4f" % (max_degree_abs_err/n_iter))

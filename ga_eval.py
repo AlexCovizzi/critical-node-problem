@@ -18,20 +18,20 @@ def print_results(n_iter, abs_err, rel_err, time):
 
 
 if __name__ == "__main__":
-    dim = 30
-    k = 8
+    dim = 70
+    k = 10
     threshold = None
     cconnected = False
-    n_edges = 90
+    n_edges = 120
     
-    n_iter = 500
+    n_iter = 100
     
     # Parametri degli Algoritmi Genetici
-    pop_dim = 30
-    stoc_dim = 6
-    n_parents = 8
+    pop_dim = 60
+    stoc_dim = 10
+    n_parents = 20
     max_generations = 500
-    bests = [max_degree_best, min_conn_best]
+    bests = [max_degree_best, min_conn_best, min_conn_ratio_best]
 
     pop_dist = 0
 
@@ -51,7 +51,7 @@ if __name__ == "__main__":
             graph = create_graph_with_n_edges(dim, edges=n_edges)
         n_connected = calc_objective(graph, [])
 
-        opt, _ = global_optimum(graph, k)
+        opt, _ = global_optimum(graph, k, "ga_eval.pl", "ga-out")
         
         population = create_population(graph, k, pop_dim, bests, stoc_dim)
         pop_dist += calc_dist(population)
@@ -80,7 +80,7 @@ if __name__ == "__main__":
         
     print("\n-------------------------------------\n")
 
-    print("Distanza media della popolazione: %.4f" % (pop_dist))
+    print("Distanza media della popolazione: %.4f" % (pop_dist / n_iter))
     
     print("\n-------------------------------------\n")
 
