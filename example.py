@@ -5,7 +5,7 @@ from graph import create_graph, calc_objective, create_graph_with_n_edges, calc_
 from asp import global_optimum
 from minizinc import relaxed_optimum
 from neighbor_search import k_swap, best_1_swap, first_improvement_2_swap, tabu_search
-from genetic_algo import genetic_algo_binary, genetic_algo_removed
+from genetic_algo import genetic_algo_binary, genetic_algo_removed, calc_dist
 
 
 def calc_errors(opt, sol):
@@ -13,16 +13,21 @@ def calc_errors(opt, sol):
     abs_error = opt - sol
     return rel_error, abs_error
 
-def print_solution(removed, sol, opt, calc_time):
-    rel_error, abs_error = calc_errors(opt, sol)
-    
+def print_solution(removed, sol, alt_sol, opt, alt_opt, calc_time):
+    if opt:
+        rel_error, abs_error = calc_errors(opt, sol)
+    elif alt_opt:
+        rel_error, abs_error = calc_errors(alt_opt, alt_sol)
+
     removed = removed[:]
     removed.sort()
     print("Tempo di calcolo (in sec): %.3f" % calc_time)
     print("Soluzione trovata: {}".format(sol))
+    print("Soluzione alternativa trovata: {}".format(alt_sol))
     print("Nodi rimossi: {}".format(removed))
-    print("Errore relativo: %.1f %%" % rel_error)
-    print("Errore assoluto: {}".format(abs_error))
+    if opt or alt_opt:
+        print("Errore relativo: %.1f %%" % rel_error)
+        print("Errore assoluto: {}".format(abs_error))
 
 
 def create_dat(graph, k, out="cndp.dat"):
@@ -41,19 +46,19 @@ def count_edges(graph):
 
 if __name__ == '__main__':
     # Dati del problema
-    dim = 70
+    dim = 30
     k = 10
     threshold = None
     cconnected = True
-    n_edges = 130
+    n_edges = 100
     ddraw = False
 
     #Boolean di controllo
-    gglobal_optimum = True
+    gglobal_optimum = False
     rrelaxed_optimum = True
-    max_degree = False
-    min_connection = False
-    min_connection_ratio = False
+    max_degree = True
+    min_connection = True
+    min_connection_ratio = True
     random_k_swap = False
     bbest_1_swap = False
     fi_2_swap = False
@@ -61,7 +66,7 @@ if __name__ == '__main__':
     variable_neighborhood_search = False
     multistart_search = False
     ggenetic_removed = False
-    genetic_binary = True
+    genetic_binary = False
     save = False
 
     # Parametri del Random K-Swap
@@ -109,13 +114,13 @@ if __name__ == '__main__':
     if gglobal_optimum:
         print("Ottimo globale")
         start_time = time.time()
-        opt, opt_removed = global_optimum(graph, k)
+        global_opt, opt_removed = global_optimum(graph, k)
         global_alt_sol = calc_alt_objective(graph, opt_removed)
 
         calc_time = time.time() - start_time
 
         opt_removed.sort()
-        print("Ottimo globale: {}".format(opt))
+        print("Ottimo globale: {}".format(global_opt))
         print("Nodi rimossi: {}".format(opt_removed))
         print("Tempo di calcolo (in sec): %.3f" % calc_time)
         
@@ -125,9 +130,6 @@ if __name__ == '__main__':
             draw.show(opt_removed)
         
         print("\n-------------------------------------\n")
-    else:
-        opt = 1
-
     
     # Ottimo rilassato
     if rrelaxed_optimum:
@@ -144,17 +146,27 @@ if __name__ == '__main__':
         
         print("\n-------------------------------------\n")
 
+    if global_optimum:
+        opt = global_opt
+        alt_opt = global_alt_sol
+    elif rrelaxed_optimum:
+        opt = None
+        alt_opt = relaxed_optimum
+    else:
+        opt = None
+        alt_opt = None
+
     # Applichiamo le greeedy
-    
     if max_degree or random_k_swap or bbest_1_swap or fi_2_swap or tabu:
         print("Max Degree Greedy")
         start_time = time.time()
         max_degree_removed = algo_greedy(graph, k, max_degree_best)
         max_degree_sol = calc_objective(graph, max_degree_removed)
+        max_degree_alt_sol = calc_alt_objective(graph, max_degree_removed)
 
         calc_time = time.time() - start_time
 
-        print_solution(max_degree_removed, max_degree_sol, opt, calc_time)
+        print_solution(max_degree_removed, max_degree_sol, max_degree_alt_sol, opt, alt_opt, calc_time)
 
         if ddraw:
             draw.show(max_degree_removed)
@@ -166,10 +178,11 @@ if __name__ == '__main__':
         start_time = time.time()
         min_conn_removed = algo_greedy(graph, k, min_conn_best)
         min_conn_sol = calc_objective(graph, min_conn_removed)
+        min_conn_alt_sol = calc_alt_objective(graph, min_conn_removed)
 
         calc_time = time.time() - start_time
 
-        print_solution(min_conn_removed, min_conn_sol, opt, calc_time)
+        print_solution(min_conn_removed, min_conn_sol, min_conn_alt_sol, opt, alt_opt, calc_time)
 
         if ddraw:
             draw.show(min_conn_removed)
@@ -181,10 +194,12 @@ if __name__ == '__main__':
         start_time = time.time()
         min_conn_ratio_removed = algo_greedy(graph, k, min_conn_ratio_best)
         min_conn_ratio_sol = calc_objective(graph, min_conn_ratio_removed)
+        min_conn_ratio_alt_sol = calc_alt_objective(graph, min_conn_ratio_removed)
 
         calc_time = time.time() - start_time
+
         
-        print_solution(min_conn_ratio_removed, min_conn_ratio_sol, opt, calc_time)
+        print_solution(min_conn_ratio_removed, min_conn_ratio_sol, min_conn_ratio_alt_sol, opt, alt_opt, calc_time)
 
         if ddraw:
             draw.show(min_conn_ratio_removed)
@@ -209,9 +224,11 @@ if __name__ == '__main__':
                 k_swap_sol = tmp_sol
                 k_swap_removed = tmp_removed
 
+        k_swap_alt_sol = calc_alt_objective(graph, k_swap_removed)
         calc_time = time.time() - start_time
+
         
-        print_solution(k_swap_removed, k_swap_sol, opt, calc_time)
+        print_solution(k_swap_removed, k_swap_sol, k_swap_alt_sol, opt, alt_opt, calc_time)
 
         improvement = k_swap_sol - max_degree_sol
         print("Miglioramento: {}".format(improvement))
@@ -241,9 +258,10 @@ if __name__ == '__main__':
             else:
                 break
 
+        one_swap_alt_sol = calc_alt_objective(graph, one_swap_removed)
         calc_time = time.time() - start_time
-        
-        print_solution(one_swap_removed, one_swap_sol, opt, calc_time)
+
+        print_solution(one_swap_removed, one_swap_sol, one_swap_alt_sol, opt, alt_opt, calc_time)
 
         improvement = one_swap_sol - max_degree_sol
         print("Miglioramento: {}".format(improvement))
@@ -273,9 +291,10 @@ if __name__ == '__main__':
             else:
                 break
 
+        two_swap_alt_sol = calc_alt_objective(graph, two_swap_removed)
         calc_time = time.time() - start_time
-        
-        print_solution(two_swap_removed, two_swap_sol, opt, calc_time)
+
+        print_solution(two_swap_removed, two_swap_sol, two_swap_alt_sol, opt, alt_opt, calc_time)
 
         improvement = two_swap_sol - max_degree_sol
         print("Miglioramento: {}".format(improvement))
@@ -296,10 +315,11 @@ if __name__ == '__main__':
         start_time = time.time()
         tabu_removed = tabu_search(graph, tabu_removed, n_tabu=n_tabu, n_stall=n_stall)
         tabu_sol = calc_objective(graph, tabu_removed)
+        tabu_alt_sol = calc_alt_objective(graph, tabu_removed)
 
         calc_time = time.time() - start_time
         
-        print_solution(tabu_removed, tabu_sol, opt, calc_time)
+        print_solution(tabu_removed, tabu_sol, tabu_alt_sol, opt, alt_opt, calc_time)
 
         improvement = tabu_sol - max_degree_sol
         print("Miglioramento: {}".format(improvement))
@@ -332,9 +352,10 @@ if __name__ == '__main__':
             else:
                 cont += 1
         
+        vns_alt_sol = calc_alt_objective(graph, vns_removed)
         calc_time = time.time() - start_time
         
-        print_solution(vns_removed, vns_sol, opt, calc_time)
+        print_solution(vns_removed, vns_sol, vns_alt_sol, opt, alt_opt, calc_time)
 
         improvement = vns_sol - max_degree_sol
         print("Miglioramento: {}".format(improvement))
@@ -372,9 +393,10 @@ if __name__ == '__main__':
                 mss_best_sol = mss_sol
                 mss_best_removed = mss_removed
         
+        mss_alt_sol = calc_alt_objective(graph, mss_removed)
         calc_time = time.time() - start_time
         
-        print_solution(mss_removed, mss_sol, opt, calc_time)
+        print_solution(mss_removed, mss_sol, mss_alt_sol, opt, alt_opt, calc_time)
 
         if ddraw:
             draw.show(mss_removed)
@@ -395,10 +417,11 @@ if __name__ == '__main__':
         start_time = time.time()
         genetic_removed = genetic_algo_removed(graph, population, n_parents, max_generations)
         genetic_sol = calc_objective(graph, genetic_removed)
+        genetic_alt_sol = calc_alt_objective(graph, genetic_removed)
 
         calc_time = time.time() - start_time
         
-        print_solution(genetic_removed, genetic_sol, opt, calc_time)
+        print_solution(genetic_removed, genetic_sol, genetic_alt_sol, opt, alt_opt, calc_time)
 
         if ddraw:
             draw.show(genetic_removed)
@@ -415,8 +438,7 @@ if __name__ == '__main__':
 
         calc_time = time.time() - start_time
         
-        print_solution(genetic_bin_removed, genetic_bin_sol, opt, calc_time)
-        print("Soluzione alternativa: {}".format(genetic_bin_alt_sol))
+        print_solution(genetic_bin_removed, genetic_bin_sol, genetic_bin_alt_sol, opt, alt_opt, calc_time)
 
         if ddraw:
             draw.show(genetic_bin_removed)
