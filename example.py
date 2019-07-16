@@ -46,27 +46,27 @@ def count_edges(graph):
 
 if __name__ == '__main__':
     # Dati del problema
-    dim = 30
-    k = 10
+    dim = 20
+    k = 6
     threshold = None
     cconnected = True
-    n_edges = 100
+    n_edges = 45
     ddraw = False
 
     #Boolean di controllo
-    gglobal_optimum = False
-    rrelaxed_optimum = True
+    gglobal_optimum = True
+    rrelaxed_optimum = False
     max_degree = True
     min_connection = True
     min_connection_ratio = True
-    random_k_swap = False
-    bbest_1_swap = False
-    fi_2_swap = False
-    tabu = False
-    variable_neighborhood_search = False
-    multistart_search = False
-    ggenetic_removed = False
-    genetic_binary = False
+    random_k_swap = True
+    bbest_1_swap = True
+    fi_2_swap = True
+    tabu = True
+    variable_neighborhood_search = True
+    multistart_search = True
+    ggenetic_removed = True
+    genetic_binary = True
     save = False
 
     # Parametri del Random K-Swap
@@ -146,7 +146,7 @@ if __name__ == '__main__':
         
         print("\n-------------------------------------\n")
 
-    if global_optimum:
+    if gglobal_optimum:
         opt = global_opt
         alt_opt = global_alt_sol
     elif rrelaxed_optimum:
@@ -403,13 +403,15 @@ if __name__ == '__main__':
         
         print("\n-------------------------------------\n")
 
-    if genetic_algo_binary or genetic_algo_removed:
+    if ggenetic_removed or genetic_binary:
         print("Creiamo una popolazione di {} individui per gli algoritmi genetici".format(pop_dim))
         population = create_population(graph, k, pop_dim, [max_degree_best, min_conn_best, min_conn_ratio_best], stoc_dim)
         pop_dist = calc_dist(population)
         print("La popolazione ha una distanza media di %.4f" % pop_dist)
 
         print("Generiamo un totale di {} generazioni e ad ogni generazione verranno scelti {} genitori\n".format(max_generations, n_parents))
+
+        print("\n-------------------------------------\n")
 
     if ggenetic_removed:
         print("\nAlgoritmo genetico, codifica: vettore a {} interi".format(k))
